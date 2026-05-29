@@ -103,15 +103,7 @@ function App() {
             {/* HERO SECTION */}
             <section
               id="hero"
-              style={{
-                height: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-                overflow: 'hidden',
-                pointerEvents: 'none' // allow mouse to pass through to 3D canvas
-              }}
+              className="hero-section"
             >
               {/* Dark subtle overlay to enhance text readability */}
               <div style={{
@@ -125,15 +117,7 @@ function App() {
               }} />
 
               <div 
-                className="container" 
-                style={{ 
-                  textAlign: 'center', 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  gap: '24px',
-                  pointerEvents: 'auto' // re-enable clicks for buttons/text
-                }}
+                className="container hero-container" 
               >
                 {/* Visual Accent badge */}
                 <motion.div

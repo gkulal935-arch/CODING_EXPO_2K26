@@ -354,4 +354,51 @@ select option {
   }
 }
 
+/* Futuristic Logo system animations */
+@keyframes gradient-flow-logo {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
 
+@keyframes logo-neon-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.35));
+  }
+  20%, 24%, 55% {
+    opacity: 0.95;
+    filter: drop-shadow(0 0 4px rgba(0, 240, 255, 0.2));
+  }
+}
+
+/* Responsive Hero Spacing Systems */
+.hero-section {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  pointer-events: auto;
+}
+
+@media (max-width: 767px) {
+  .hero-section {
+    align-items: flex-start;
+    padding-top: 110px;
+    height: auto;
+    min-height: 80vh;
+  }
+  .hero-container {
+    gap: 16px;
+  }
+}

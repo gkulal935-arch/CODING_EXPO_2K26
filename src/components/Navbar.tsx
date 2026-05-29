@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAudio } from '../hooks/useAudio';
-import { Volume2, VolumeX, Menu, X } from 'lucide-react';
+import { Volume2, VolumeX, Menu, X, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface NavbarProps {
@@ -66,30 +66,138 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
           boxShadow: '0 0 20px rgba(0, 240, 255, 0.05)'
         }}
       >
-        {/* Brand Logo - Simplified to premium CodingExpo 2025 */}
+        {/* Brand Logo - Redesigned into premium futuristic logo system */}
         <div 
           className="clickable"
           style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '10px',
+            gap: '12px',
             cursor: 'pointer',
-            zIndex: 1001
+            zIndex: 1001,
+            position: 'relative'
           }}
           onClick={(e) => handleLinkClick(e, 'hero')}
           onMouseEnter={playHover}
         >
-          <span 
-            className="premium-logo clickable"
-            style={{ 
-              fontFamily: "'Orbitron', 'Space Grotesk', sans-serif", 
-              fontWeight: 900, 
-              letterSpacing: '1px',
-              fontSize: 'clamp(1rem, 4vw, 1.25rem)',
-            }}
-          >
-            Coding Expo 2026
-          </span>
+          {/* Logo Sparks */}
+          <div style={{ position: 'absolute', top: -10, left: -10, width: 'calc(100% + 20px)', height: 'calc(100% + 20px)', pointerEvents: 'none', zIndex: 0 }}>
+            {[...Array(4)].map((_, i) => (
+              <motion.div
+                key={i}
+                animate={{
+                  y: [0, -12 - (i * 3), 0],
+                  x: [0, (i % 2 === 0 ? 1 : -1) * 6, 0],
+                  opacity: [0, 0.65, 0],
+                  scale: [0.4, 0.8, 0.4]
+                }}
+                transition={{
+                  duration: 2.5 + i,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: i * 0.4
+                }}
+                style={{
+                  position: 'absolute',
+                  width: '2px',
+                  height: '2px',
+                  borderRadius: '50%',
+                  backgroundColor: i % 2 === 0 ? '#00f0ff' : '#8b5cf6',
+                  boxShadow: i % 2 === 0 ? '0 0 4px #00f0ff' : '0 0 4px #8b5cf6',
+                  left: `${20 + i * 20}%`,
+                  top: `${10 + i * 15}%`
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Futuristic Icon beside logo */}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* Pulsing Outer Ring */}
+            <motion.div
+              animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.7, 0.3] }}
+              transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+              style={{
+                position: 'absolute',
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                border: '1px solid rgba(0, 240, 255, 0.4)',
+                boxShadow: '0 0 10px rgba(0, 240, 255, 0.2)'
+              }}
+            />
+            {/* Spinning Tech Ring */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 10, ease: 'linear' }}
+              style={{
+                position: 'absolute',
+                width: '26px',
+                height: '26px',
+                borderRadius: '50%',
+                border: '1px dashed rgba(139, 92, 246, 0.6)',
+              }}
+            />
+            {/* Central Icon */}
+            <Cpu size={16} style={{ color: '#00f0ff', filter: 'drop-shadow(0 0 4px #00f0ff)', position: 'relative', zIndex: 2 }} />
+          </div>
+
+          {/* Logo Text System */}
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1', position: 'relative', zIndex: 2 }}>
+            <span style={{
+              fontFamily: "'Orbitron', sans-serif",
+              fontSize: '0.62rem',
+              fontWeight: 800,
+              color: '#8b5cf6',
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
+              marginBottom: '2px',
+              opacity: 0.85,
+              filter: 'drop-shadow(0 0 2px rgba(139, 92, 246, 0.5))'
+            }}>
+              CODING
+            </span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+              <span className="premium-logo-text" style={{
+                fontFamily: "'Orbitron', sans-serif",
+                fontSize: '1.15rem',
+                fontWeight: 900,
+                color: '#fff',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                background: 'linear-gradient(90deg, #fff, #00f0ff, #8b5cf6, #fff)',
+                backgroundSize: '300% 100%',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                animation: 'gradient-flow-logo 6s linear infinite, logo-neon-flicker 10s infinite',
+                filter: 'drop-shadow(0 0 8px rgba(0, 240, 255, 0.35))'
+              }}>
+                EXPO
+              </span>
+              <span style={{
+                fontFamily: "'Orbitron', sans-serif",
+                fontSize: '0.75rem',
+                fontWeight: 900,
+                color: '#ec4899',
+                letterSpacing: '1px',
+                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))'
+              }}>
+                2026
+              </span>
+            </div>
+            
+            {/* Underlying Animated Glowing Line */}
+            <motion.div
+              animate={{ width: ['0%', '100%', '0%'] }}
+              transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+              style={{
+                height: '1px',
+                background: 'linear-gradient(90deg, transparent, #00f0ff, #8b5cf6, transparent)',
+                marginTop: '3px',
+                boxShadow: '0 0 6px #00f0ff'
+              }}
+            />
+          </div>
         </div>
 
 
