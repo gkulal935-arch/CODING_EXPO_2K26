@@ -21,7 +21,7 @@ export const Footer: React.FC<FooterProps> = () => {
       }}
     >
       {/* Animated Gradient Line at the Top of Footer */}
-      <div 
+      <div
         style={{
           height: '2px',
           width: '100%',
@@ -30,11 +30,11 @@ export const Footer: React.FC<FooterProps> = () => {
           top: 0,
           left: 0,
           boxShadow: '0 0 10px rgba(0, 240, 255, 0.2)'
-        }} 
+        }}
       />
 
       {/* Background Glowing Ambient Light */}
-      <div 
+      <div
         style={{
           position: 'absolute',
           bottom: '-30px',
@@ -47,7 +47,7 @@ export const Footer: React.FC<FooterProps> = () => {
           filter: 'blur(30px)',
           pointerEvents: 'none',
           zIndex: -1
-        }} 
+        }}
       />
 
       {/* Tiny Floating Particles */}
@@ -88,13 +88,13 @@ export const Footer: React.FC<FooterProps> = () => {
           textAlign: 'center',
           gap: '12px'
         }}>
-          
+
           {/* Main Title */}
-          <h3 
-            style={{ 
-              fontFamily: "'Orbitron', sans-serif", 
-              fontSize: '0.95rem', 
-              color: '#fff', 
+          <h3
+            style={{
+              fontFamily: "'Orbitron', sans-serif",
+              fontSize: '0.95rem',
+              color: '#fff',
               fontWeight: 800,
               letterSpacing: '2px',
               margin: 0,
@@ -108,10 +108,10 @@ export const Footer: React.FC<FooterProps> = () => {
           </h3>
 
           {/* Credits Line */}
-          <p 
-            style={{ 
-              fontFamily: "'Space Grotesk', sans-serif", 
-              color: '#9ca3af', 
+          <p
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              color: '#9ca3af',
               fontSize: '0.75rem',
               margin: 0,
               lineHeight: '1.6',
@@ -122,7 +122,7 @@ export const Footer: React.FC<FooterProps> = () => {
             onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
             onMouseOut={(e) => e.currentTarget.style.opacity = '0.85'}
           >
-            Developed by <span style={{ color: '#00f0ff', transition: 'color 0.3s ease' }}>Kedantra Group of Technologies</span> under the guidance of <span style={{ color: '#8b5cf6', transition: 'color 0.3s ease' }}>Errol D Almeida</span>
+            © 2026 Coding Expo | Developed by Incubation Center | All Rights Reserved.
           </p>
 
         </div>

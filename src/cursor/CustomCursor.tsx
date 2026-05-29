@@ -204,7 +204,7 @@ export const CustomCursor: React.FC = () => {
             width: '100vw',
             height: '100vh',
             pointerEvents: 'none', // Ensure container passes events through
-            zIndex: 9999,
+            zIndex: 999999,
             mixBlendMode: 'screen', // Screen blend mode blends glowing colors additively
             backfaceVisibility: 'hidden',
             transform: 'translate3d(0,0,0)', // GPU layout acceleration

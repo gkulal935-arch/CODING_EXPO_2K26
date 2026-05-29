@@ -140,10 +140,13 @@ export const CanvasCodeTexture: React.FC<CanvasCodeTextureProps> = ({
       ctx.globalAlpha = 1.0;
 
       // Draw terminal cursor at the last line
-      const cursorY = canvas.height - 20;
-      if (Math.floor(time * 3) % 2 === 0) {
-        ctx.fillStyle = color;
-        ctx.fillRect(state.lines[state.lines.length - 1].x + ctx.measureText(state.lines[state.lines.length - 1].text).width + 6, cursorY - 14, 10, 16);
+      if (state.lines.length > 0) {
+        const lastLine = state.lines[state.lines.length - 1];
+        const cursorY = canvas.height - 20;
+        if (Math.floor(time * 3) % 2 === 0) {
+          ctx.fillStyle = color;
+          ctx.fillRect(lastLine.x + ctx.measureText(lastLine.text).width + 6, cursorY - 14, 10, 16);
+        }
       }
 
     } else if (type === 'graph') {

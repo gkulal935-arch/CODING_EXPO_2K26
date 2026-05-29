@@ -402,3 +402,212 @@ select option {
     gap: 16px;
   }
 }
+
+/* Responsive adjustments for Container padding on mobile screens */
+@media (max-width: 640px) {
+  .container {
+    padding: 0 16px !important;
+  }
+}
+
+/* Glowing Glassmorphic Form Card with Responsive Padding */
+.submission-card {
+  padding: 40px;
+  border: 1px solid rgba(139, 92, 246, 0.25) !important;
+  box-shadow: 0 10px 40px rgba(5, 8, 22, 0.95);
+  border-radius: 16px;
+  position: relative;
+}
+
+@media (max-width: 640px) {
+  .submission-card {
+    padding: 24px 16px !important;
+  }
+}
+
+/* Responsive grid for file uploads */
+.file-uploads-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .file-uploads-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+/* Ensure form input elements shrink properly on small viewports */
+.submission-card input,
+.submission-card select,
+.submission-card textarea {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+/* ================= ANIMATIC ELECTRIC/THUNDER ACCENT BARS ================= */
+
+/* flowing laser gradient track */
+@keyframes laser-flow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 0% 400%; }
+}
+
+/* high-voltage flickering spark effect */
+@keyframes thunder-spark {
+  0%, 100% { 
+    opacity: 0.85; 
+    filter: drop-shadow(0 0 3px rgba(0, 240, 255, 0.65)) drop-shadow(0 0 8px rgba(0, 240, 255, 0.3)); 
+  }
+  30% { 
+    opacity: 1; 
+    filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.95)) drop-shadow(0 0 16px rgba(0, 240, 255, 0.65)); 
+  }
+  35% { 
+    opacity: 0.55; 
+    filter: drop-shadow(0 0 2px rgba(139, 92, 246, 0.4)); 
+  }
+  40% { 
+    opacity: 1; 
+    filter: drop-shadow(0 0 7px rgba(0, 240, 255, 0.85)) drop-shadow(0 0 14px rgba(139, 92, 246, 0.55)); 
+  }
+  70% { 
+    opacity: 0.9; 
+    filter: drop-shadow(0 0 5px rgba(236, 72, 153, 0.75)) drop-shadow(0 0 11px rgba(236, 72, 153, 0.45)); 
+  }
+  90% { 
+    opacity: 0.7; 
+    filter: drop-shadow(0 0 3px rgba(0, 240, 255, 0.5)); 
+  }
+}
+
+.laser-sideline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #00f0ff, #8b5cf6, #ec4899, #00f0ff);
+  background-size: 100% 400%;
+  animation: laser-flow 3s linear infinite, thunder-spark 1.5s ease-in-out infinite;
+  z-index: 2;
+  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.glass-panel.clickable:hover .laser-sideline {
+  width: 6px;
+}
+
+/* Card shimmer sweep effect */
+.card-shimmer-sweep {
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 240, 255, 0.15) 30%,
+    rgba(139, 92, 246, 0.25) 50%,
+    rgba(0, 240, 255, 0.15) 70%,
+    transparent
+  );
+  transform: skewX(-25deg);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.glass-panel.clickable:hover .card-shimmer-sweep {
+  animation: shimmer-sweep-anim 1s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes shimmer-sweep-anim {
+  0% { left: -150%; }
+  100% { left: 150%; }
+}
+
+/* ================= PORTAL MODALS RESPONSIVE LAYOUTS ================= */
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(5, 8, 22, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 99999 !important;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: 80px 24px 40px;
+}
+
+.details-modal-card {
+  width: 100%;
+  max-width: 780px;
+  padding: 40px;
+  border: 1px solid rgba(0, 240, 255, 0.35) !important;
+  box-shadow: 0 0 40px rgba(0, 240, 255, 0.1);
+  position: relative;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.success-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(5, 8, 22, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 99999 !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.success-modal-card {
+  width: 100%;
+  max-width: 520px;
+  padding: 40px;
+  border: 2px solid rgba(0, 255, 136, 0.35) !important;
+  box-shadow: 0 0 40px rgba(0, 255, 136, 0.15);
+  position: relative;
+  border-radius: 16px;
+  text-align: center;
+  overflow: hidden;
+  margin: auto;
+}
+
+@media (max-width: 640px) {
+  .modal-backdrop {
+    padding: 40px 16px 20px !important;
+  }
+  
+  .details-modal-card {
+    padding: 24px 16px !important;
+  }
+  
+  .success-backdrop {
+    padding: 16px !important;
+    align-items: flex-start !important;
+  }
+  
+  .success-modal-card {
+    padding: 30px 16px !important;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+}
