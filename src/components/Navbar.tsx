@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAudio } from '../hooks/useAudio';
 import { Volume2, VolumeX, Menu, X, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import collegeLogo from '../assets/logo-removebg-preview.png';
 
 interface NavbarProps {
   activeSection: string;
@@ -51,28 +52,28 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
         className="glass-panel clickable"
         style={{
           position: 'fixed',
-          top: '20px',
+          top: isMobile ? '12px' : '20px',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '90%',
+          width: isMobile ? '94%' : '90%',
           maxWidth: '1100px',
-          height: '64px',
+          height: isMobile ? '56px' : '64px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 24px',
+          padding: isMobile ? '0 12px' : '0 24px',
           zIndex: 1000,
           border: '1px solid rgba(0, 240, 255, 0.2)',
-          boxShadow: '0 0 20px rgba(0, 240, 255, 0.05)'
+          boxShadow: '0 0 20px rgba(0, 240, 255, 0.05)',
+          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
-        {/* Brand Logo - Redesigned into premium futuristic logo system */}
         <div 
           className="clickable"
           style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '12px',
+            gap: isMobile ? '6px' : '12px',
             cursor: 'pointer',
             zIndex: 1001,
             position: 'relative'
@@ -111,56 +112,90 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
             ))}
           </div>
 
-          {/* Futuristic Icon beside logo */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {/* Pulsing Outer Ring */}
-            <motion.div
-              animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.7, 0.3] }}
-              transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-              style={{
-                position: 'absolute',
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                border: '1px solid rgba(0, 240, 255, 0.4)',
-                boxShadow: '0 0 10px rgba(0, 240, 255, 0.2)'
-              }}
-            />
-            {/* Spinning Tech Ring */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 10, ease: 'linear' }}
-              style={{
-                position: 'absolute',
-                width: '26px',
-                height: '26px',
-                borderRadius: '50%',
-                border: '1px dashed rgba(139, 92, 246, 0.6)',
-              }}
-            />
-            {/* Central Icon */}
-            <Cpu size={16} style={{ color: '#00f0ff', filter: 'drop-shadow(0 0 4px #00f0ff)', position: 'relative', zIndex: 2 }} />
-          </div>
+          {/* College Logo */}
+          <img 
+            src={collegeLogo} 
+            alt="College Logo" 
+            style={{
+              height: isMobile ? '24px' : '32px',
+              width: 'auto',
+              objectFit: 'contain',
+              transition: 'transform 0.3s ease, filter 0.3s ease',
+              filter: 'drop-shadow(0 0 2px rgba(255,255,255,0.15))',
+              display: 'block'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.filter = 'drop-shadow(0 0 8px rgba(0, 240, 255, 0.4))';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.filter = 'drop-shadow(0 0 2px rgba(255,255,255,0.15))';
+            }}
+          />
+
+          {/* Institutional Divider */}
+          <div style={{
+            width: '1px',
+            height: isMobile ? '16px' : '22px',
+            backgroundColor: 'rgba(255, 255, 255, 0.18)',
+            margin: isMobile ? '0' : '0 2px 0 0',
+            transition: 'all 0.3s ease'
+          }} />
+
+          {/* Futuristic Icon beside logo (Hidden on Mobile to prevent overcrowding) */}
+          {!isMobile && (
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '4px' }}>
+              {/* Pulsing Outer Ring */}
+              <motion.div
+                animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.7, 0.3] }}
+                transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+                style={{
+                  position: 'absolute',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(0, 240, 255, 0.4)',
+                  boxShadow: '0 0 10px rgba(0, 240, 255, 0.2)'
+                }}
+              />
+              {/* Spinning Tech Ring */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 10, ease: 'linear' }}
+                style={{
+                  position: 'absolute',
+                  width: '26px',
+                  height: '26px',
+                  borderRadius: '50%',
+                  border: '1px dashed rgba(139, 92, 246, 0.6)',
+                }}
+              />
+              {/* Central Icon */}
+              <Cpu size={16} style={{ color: '#00f0ff', filter: 'drop-shadow(0 0 4px #00f0ff)', position: 'relative', zIndex: 2 }} />
+            </div>
+          )}
 
           {/* Logo Text System */}
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1', position: 'relative', zIndex: 2 }}>
             <span style={{
               fontFamily: "'Orbitron', sans-serif",
-              fontSize: '0.62rem',
+              fontSize: isMobile ? '0.52rem' : '0.62rem',
               fontWeight: 800,
               color: '#8b5cf6',
-              letterSpacing: '3px',
+              letterSpacing: isMobile ? '2px' : '3px',
               textTransform: 'uppercase',
               marginBottom: '2px',
               opacity: 0.85,
-              filter: 'drop-shadow(0 0 2px rgba(139, 92, 246, 0.5))'
+              filter: 'drop-shadow(0 0 2px rgba(139, 92, 246, 0.5))',
+              transition: 'all 0.3s ease'
             }}>
               CODING
             </span>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
               <span className="premium-logo-text" style={{
                 fontFamily: "'Orbitron', sans-serif",
-                fontSize: '1.15rem',
+                fontSize: isMobile ? '0.95rem' : '1.15rem',
                 fontWeight: 900,
                 color: '#fff',
                 letterSpacing: '1px',
@@ -170,17 +205,19 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 animation: 'gradient-flow-logo 6s linear infinite, logo-neon-flicker 10s infinite',
-                filter: 'drop-shadow(0 0 8px rgba(0, 240, 255, 0.35))'
+                filter: 'drop-shadow(0 0 8px rgba(0, 240, 255, 0.35))',
+                transition: 'all 0.3s ease'
               }}>
                 EXPO
               </span>
               <span style={{
                 fontFamily: "'Orbitron', sans-serif",
-                fontSize: '0.75rem',
+                fontSize: isMobile ? '0.65rem' : '0.75rem',
                 fontWeight: 900,
                 color: '#ec4899',
                 letterSpacing: '1px',
-                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))'
+                filter: 'drop-shadow(0 0 4px rgba(236, 72, 153, 0.5))',
+                transition: 'all 0.3s ease'
               }}>
                 2026
               </span>
@@ -253,19 +290,21 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
         )}
 
         {/* Right Side Buttons: Audio toggle & Hamburger Menu */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', zIndex: 1001 }}>
-          {/* Status (simplified from HOST_SECURE to student-friendly ACTIVE badge) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', color: '#00ff88', fontFamily: "'Space Grotesk', sans-serif" }}>
-            <span style={{ 
-              width: '6px', 
-              height: '6px', 
-              borderRadius: '50%', 
-              backgroundColor: '#00ff88',
-              boxShadow: '0 0 6px #00ff88',
-              animation: 'pulse 2s infinite'
-            }} />
-            <span style={{ letterSpacing: '1px', fontWeight: 600, display: window.innerWidth < 400 ? 'none' : 'inline' }}>ACTIVE</span>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '12px', zIndex: 1001 }}>
+          {/* Status (Hidden on Mobile to preserve spacing) */}
+          {!isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', color: '#00ff88', fontFamily: "'Space Grotesk', sans-serif" }}>
+              <span style={{ 
+                width: '6px', 
+                height: '6px', 
+                borderRadius: '50%', 
+                backgroundColor: '#00ff88',
+                boxShadow: '0 0 6px #00ff88',
+                animation: 'pulse 2s infinite'
+              }} />
+              <span style={{ letterSpacing: '1px', fontWeight: 600 }}>ACTIVE</span>
+            </div>
+          )}
 
           {/* Audio Toggle Button */}
           <button
@@ -279,8 +318,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
               background: isMuted ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 240, 255, 0.1)',
               border: `1px solid ${isMuted ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 240, 255, 0.4)'}`,
               borderRadius: '50%',
-              width: '36px',
-              height: '36px',
+              width: isMobile ? '32px' : '36px',
+              height: isMobile ? '32px' : '36px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -291,7 +330,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
             }}
             title={isMuted ? "Unmute Sound" : "Mute Sound"}
           >
-            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} style={{ animation: 'pulse 1.5s infinite' }} />}
+            {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} style={{ animation: 'pulse 1.5s infinite' }} />}
           </button>
 
           {/* Mobile Hamburger Button */}
@@ -304,8 +343,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
                 background: isOpen ? 'rgba(139, 92, 246, 0.15)' : 'rgba(255, 255, 255, 0.03)',
                 border: `1px solid ${isOpen ? 'rgba(139, 92, 246, 0.4)' : 'rgba(255, 255, 255, 0.15)'}`,
                 borderRadius: '50%',
-                width: '36px',
-                height: '36px',
+                width: '32px',
+                height: '32px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -315,7 +354,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection, onNavigate }) => 
                 transition: 'all 0.3s ease'
               }}
             >
-              {isOpen ? <X size={18} /> : <Menu size={18} />}
+              {isOpen ? <X size={16} /> : <Menu size={16} />}
             </button>
           )}
         </div>

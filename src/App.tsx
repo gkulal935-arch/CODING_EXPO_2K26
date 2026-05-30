@@ -148,29 +148,41 @@ function App() {
                   <span>STUDENT PROJECT SHOWCASE</span>
                 </motion.div>
 
+                {/* Title & College Name Group to ensure tight and elegant spacing */}
+                <div className="college-title-group">
+                  {/* College Name */}
+                  <motion.div
+                    initial={{ y: 15, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.8, ease: 'easeOut' }}
+                    className="college-title-accent"
+                  >
+                    DR. B.B. HEGDE FIRST GRADE COLLEGE, KUNDAPURA
+                  </motion.div>
 
-                {/* Expo Heading title */}
-                <motion.h1
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.5, duration: 1.0, type: 'spring' }}
-                  className="cinematic-title"
-                  data-text="CODING EXPO"
-                  style={{
-                    fontSize: 'clamp(3rem, 8vw, 6.5rem)',
-                    fontFamily: "'Orbitron', sans-serif",
-                    fontWeight: 900,
-                    lineHeight: '1.05',
-                    letterSpacing: '4px',
-                    marginBottom: '10px',
-                    background: 'linear-gradient(135deg, #fff 0%, #a5b4fc 40%, #00f0ff 70%, #8b5cf6 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    textShadow: '0 0 40px rgba(0, 240, 255, 0.1)'
-                  }}
-                >
-                  CODING EXPO
-                </motion.h1>
+                  {/* Expo Heading title */}
+                  <motion.h1
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.55, duration: 1.0, type: 'spring' }}
+                    className="cinematic-title"
+                    data-text="CODING EXPO"
+                    style={{
+                      fontSize: 'clamp(3rem, 8vw, 6.5rem)',
+                      fontFamily: "'Orbitron', sans-serif",
+                      fontWeight: 900,
+                      lineHeight: '1.05',
+                      letterSpacing: '4px',
+                      margin: '0 0 10px 0',
+                      background: 'linear-gradient(135deg, #fff 0%, #a5b4fc 40%, #00f0ff 70%, #8b5cf6 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      textShadow: '0 0 40px rgba(0, 240, 255, 0.1)'
+                    }}
+                  >
+                    CODING EXPO
+                  </motion.h1>
+                </div>
 
 
                 {/* Subtitle */}
