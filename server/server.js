@@ -9,6 +9,23 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load environment variables from root .env if it exists
+const envPath = path.join(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const firstEqual = trimmed.indexOf('=');
+      if (firstEqual > 0) {
+        const key = trimmed.slice(0, firstEqual).trim();
+        const value = trimmed.slice(firstEqual + 1).trim().replace(/^['"]|['"]$/g, '');
+        process.env[key] = value;
+      }
+    }
+  });
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -25,8 +42,8 @@ if (!fs.existsSync(uploadsDir)) {
 // Serve uploaded assets statically
 app.use('/uploads', express.static(uploadsDir));
 
-// Connect to local MongoDB
-const MONGO_URI = 'mongodb://127.0.0.1:27017/coding-expo';
+// Connect to MongoDB using environment variables
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/coding-expo';
 mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('MongoDB successfully connected locally.');
@@ -43,6 +60,7 @@ const projectSchema = new mongoose.Schema({
   description: { type: String, required: true },
   projectImage: { type: String, required: true },
   bannerChart: { type: String, required: true },
+  demoVideo: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -62,7 +80,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 } // limit 10MB
+  limits: { fileSize: 250 * 1024 * 1024 } // limit 250MB
 });
 
 // ================= API ENDPOINTS =================
@@ -77,10 +95,11 @@ app.get('/api/projects', async (req, res) => {
   }
 });
 
-// 2. Submit new project (with screenshots & banners)
+// 2. Submit new project (with screenshots, banners, and demo video)
 app.post('/api/projects', upload.fields([
   { name: 'projectImage', maxCount: 1 },
-  { name: 'bannerChart', maxCount: 1 }
+  { name: 'bannerChart', maxCount: 1 },
+  { name: 'demoVideo', maxCount: 1 }
 ]), async (req, res) => {
   try {
     const { title, members, classSection, description } = req.body;
@@ -104,6 +123,11 @@ app.post('/api/projects', upload.fields([
 
     const projectImgPath = `/uploads/${files.projectImage[0].filename}`;
     const bannerChartPath = `/uploads/${files.bannerChart[0].filename}`;
+    
+    let demoVideoPath = '';
+    if (files.demoVideo && files.demoVideo[0]) {
+      demoVideoPath = `/uploads/${files.demoVideo[0].filename}`;
+    }
 
     const newProject = new Project({
       title,
@@ -111,7 +135,8 @@ app.post('/api/projects', upload.fields([
       classSection,
       description,
       projectImage: projectImgPath,
-      bannerChart: bannerChartPath
+      bannerChart: bannerChartPath,
+      demoVideo: demoVideoPath || undefined
     });
 
     await newProject.save();

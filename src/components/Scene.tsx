@@ -29,7 +29,8 @@ const CameraController: React.FC = () => {
 
   useFrame((state) => {
     const pointer = state.pointer;
-    const scrollY = window.scrollY || 0;
+    // Synchronize 3D camera position with Lenis smooth scroll for butter-smooth integration
+    const scrollY = (window as any).lenis?.scroll ?? window.scrollY ?? 0;
     const aspect = state.viewport.aspect; // width / height
 
     // Adapt camera target Z based on aspect ratio (narrow portrait needs camera pulled back)

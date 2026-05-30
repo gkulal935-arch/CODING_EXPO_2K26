@@ -28,6 +28,9 @@ function App() {
       wheelMultiplier: 1.0
     });
 
+    // Make lenis globally accessible for other components (like 3D Canvas)
+    (window as any).lenis = lenis;
+
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
@@ -36,6 +39,7 @@ function App() {
 
     return () => {
       lenis.destroy();
+      delete (window as any).lenis;
     };
   }, [isLoaded]);
 

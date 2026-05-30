@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useAudio } from '../hooks/useAudio';
-import { Plus, Trash2, ArrowLeft, ArrowRight, Upload, Sparkles, CheckCircle2, Cpu } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, ArrowRight, Upload, Sparkles, CheckCircle2, Cpu, Video } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const ProjectShowcase: React.FC = () => {
   const { playHover, playClick } = useAudio();
@@ -23,10 +25,17 @@ export const ProjectShowcase: React.FC = () => {
   // File states
   const [projectImage, setProjectImage] = useState<File | null>(null);
   const [bannerChart, setBannerChart] = useState<File | null>(null);
+  const [demoVideo, setDemoVideo] = useState<File | null>(null);
   
   // Preview states
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+
+  // Drag and drop / upload states
+  const [isDraggingVideo, setIsDraggingVideo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -36,7 +45,7 @@ export const ProjectShowcase: React.FC = () => {
   const fetchProjects = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/projects');
+      const response = await fetch(`${API_URL}/api/projects`);
       if (response.ok) {
         const data = await response.json();
         setProjects(data);
@@ -87,26 +96,41 @@ export const ProjectShowcase: React.FC = () => {
   };
 
   // Handle File uploads and triggers preview
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'banner') => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'banner' | 'video') => {
     const file = e.target.files?.[0] || null;
     if (!file) return;
 
     if (type === 'image') {
       setProjectImage(file);
       setImagePreview(URL.createObjectURL(file));
-    } else {
+    } else if (type === 'banner') {
       setBannerChart(file);
       setBannerPreview(URL.createObjectURL(file));
+    } else if (type === 'video') {
+      handleVideoFile(file);
     }
   };
 
-  // Submit to Express Server multipart API
+  const handleVideoFile = (file: File) => {
+    // Basic extension check for support
+    const supportedExts = ['.mp4', '.mov', '.avi', '.webm', '.mkv'];
+    const fileName = file.name.toLowerCase();
+    const isSupported = supportedExts.some(ext => fileName.endsWith(ext));
+    if (!isSupported) {
+      alert('Unsupported video format. Please upload an MP4, MOV, AVI, WebM, or MKV file.');
+      return;
+    }
+    setDemoVideo(file);
+    setVideoPreview(URL.createObjectURL(file));
+  };
+
+  // Submit to Express Server multipart API using XMLHttpRequest for progress tracking
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     playClick();
 
-    if (!title.trim() || !description.trim() || !projectImage || !bannerChart) {
-      alert('Please fill in all details and upload both required file layers.');
+    if (!title.trim() || !description.trim() || !projectImage || !bannerChart || !demoVideo) {
+      alert('Please fill in all details and upload all three required media layers (Screenshot, Banner, and Demo Video).');
       return;
     }
 
@@ -117,6 +141,9 @@ export const ProjectShowcase: React.FC = () => {
     }
 
     setIsSubmitting(true);
+    setIsUploading(true);
+    setUploadProgress(0);
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('members', JSON.stringify(filteredMembers));
@@ -124,50 +151,75 @@ export const ProjectShowcase: React.FC = () => {
     formData.append('description', description);
     formData.append('projectImage', projectImage);
     formData.append('bannerChart', bannerChart);
+    formData.append('demoVideo', demoVideo);
 
     try {
-      const response = await fetch('http://localhost:5000/api/projects', {
-        method: 'POST',
-        body: formData
-      });
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${API_URL}/api/projects`);
 
-      if (response.ok) {
-        const newlyCreated = await response.json();
-        // Instantly reflect newly added projects into cards state list
-        setProjects(prev => [newlyCreated, ...prev]);
+      // Track upload progress
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(percentComplete);
+        }
+      };
 
-        // Reset forms fields
-        setTitle('');
-        setMembers(['', '']);
-        setClassSection('I BCA A');
-        setDescription('');
-        setProjectImage(null);
-        setBannerChart(null);
-        setImagePreview(null);
-        setBannerPreview(null);
+      xhr.onload = () => {
+        setIsUploading(false);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const newlyCreated = JSON.parse(xhr.responseText);
+          // Instantly reflect newly added projects into cards state list
+          setProjects(prev => [newlyCreated, ...prev]);
 
-        // Trigger premium canvas-confetti burst
-        confetti({
-          particleCount: 150,
-          spread: 80,
-          origin: { y: 0.6 },
-          colors: ['#00f0ff', '#8b5cf6', '#00ff88', '#ec4899']
-        });
+          // Reset forms fields
+          setTitle('');
+          setMembers(['', '']);
+          setClassSection('I BCA A');
+          setDescription('');
+          setProjectImage(null);
+          setBannerChart(null);
+          setDemoVideo(null);
+          setImagePreview(null);
+          setBannerPreview(null);
+          setVideoPreview(null);
 
-        // Set the newly submitted project details to trigger success modal
-        setNewlySubmittedProject(newlyCreated);
+          // Trigger premium canvas-confetti burst
+          confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#00f0ff', '#8b5cf6', '#00ff88', '#ec4899']
+          });
 
-        // Show Success toast
-        setSubmitSuccess(true);
-        setTimeout(() => setSubmitSuccess(false), 3000);
-      } else {
-        const errorData = await response.json();
-        alert(`Submission Failed: ${errorData.error || 'Server error'}`);
-      }
+          // Set the newly submitted project details to trigger success modal
+          setNewlySubmittedProject(newlyCreated);
+
+          // Show Success toast
+          setSubmitSuccess(true);
+          setTimeout(() => setSubmitSuccess(false), 3000);
+        } else {
+          try {
+            const errorData = JSON.parse(xhr.responseText);
+            alert(`Submission Failed: ${errorData.error || 'Server error'}`);
+          } catch {
+            alert(`Submission Failed with status: ${xhr.status}`);
+          }
+        }
+        setIsSubmitting(false);
+      };
+
+      xhr.onerror = () => {
+        setIsUploading(false);
+        setIsSubmitting(false);
+        alert('Local Express server connection lost. Submission cannot be completed.');
+      };
+
+      xhr.send(formData);
     } catch (err) {
-      alert('Local Express server connection lost. Submission cannot be persistent.');
-    } finally {
+      setIsUploading(false);
       setIsSubmitting(false);
+      alert('An error occurred during submission.');
     }
   };
 
@@ -184,7 +236,7 @@ export const ProjectShowcase: React.FC = () => {
   const getMediaUrl = (pathStr: string) => {
     if (!pathStr) return '';
     if (pathStr.startsWith('http')) return pathStr;
-    return `http://localhost:5000${pathStr}`;
+    return `${API_URL}${pathStr}`;
   };
 
   return (
@@ -491,6 +543,30 @@ export const ProjectShowcase: React.FC = () => {
                     alt={project.title} 
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
+                  {/* Video Badge Overlay */}
+                  {project.demoVideo && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '15px',
+                      left: '15px',
+                      backgroundColor: 'rgba(5, 8, 22, 0.85)',
+                      border: '1px solid rgba(0, 255, 136, 0.3)',
+                      color: '#00ff88',
+                      fontFamily: "'Orbitron', sans-serif",
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      padding: '4px 10px',
+                      borderRadius: '4px',
+                      letterSpacing: '1px',
+                      boxShadow: '0 0 10px rgba(0, 255, 136, 0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <Video size={10} style={{ fill: 'rgba(0, 255, 136, 0.3)' }} />
+                      <span>DEMO VIDEO</span>
+                    </span>
+                  )}
                   {/* Class Badge Overlay */}
                   <span style={{
                     position: 'absolute',
@@ -613,7 +689,7 @@ export const ProjectShowcase: React.FC = () => {
               
               {/* Field 1: Title */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '0.8rem', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px' }}>
+                <label style={{ fontSize: 'clamp(0.7rem, 2vw, 0.8rem)', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px', whiteSpace: 'nowrap' }}>
                   PROJECT TITLE
                 </label>
                 <input 
@@ -640,8 +716,8 @@ export const ProjectShowcase: React.FC = () => {
 
               {/* Field 2: Dynamic Team Members List */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <label style={{ fontSize: '0.8rem', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                  <label style={{ fontSize: 'clamp(0.7rem, 2vw, 0.8rem)', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px', whiteSpace: 'nowrap' }}>
                     TEAM MEMBERS (MINIMUM 2)
                   </label>
                   
@@ -653,17 +729,18 @@ export const ProjectShowcase: React.FC = () => {
                     style={{
                       backgroundColor: 'rgba(139, 92, 246, 0.1)',
                       border: '1px solid rgba(139, 92, 246, 0.4)',
-                      padding: '4px 12px',
+                      padding: '6px 14px',
                       borderRadius: '4px',
                       color: '#8b5cf6',
-                      fontSize: '0.75rem',
+                      fontSize: 'clamp(0.65rem, 1.8vw, 0.75rem)',
                       fontFamily: "'Orbitron', sans-serif",
                       fontWeight: 'bold',
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px',
-                      transition: 'all 0.3s ease'
+                      gap: '6px',
+                      transition: 'all 0.3s ease',
+                      whiteSpace: 'nowrap'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(139, 92, 246, 0.2)'}
                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(139, 92, 246, 0.1)'}
@@ -741,7 +818,7 @@ export const ProjectShowcase: React.FC = () => {
 
               {/* Field 3: Universal ClassDropdown */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '0.8rem', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px' }}>
+                <label style={{ fontSize: 'clamp(0.7rem, 2vw, 0.8rem)', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px', whiteSpace: 'nowrap' }}>
                   CLASS & SECTION
                 </label>
                 <select
@@ -774,7 +851,7 @@ export const ProjectShowcase: React.FC = () => {
                 
                 {/* Screenshot Input */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <label style={{ fontSize: '0.8rem', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px' }}>
+                  <label style={{ fontSize: 'clamp(0.7rem, 2vw, 0.8rem)', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px', whiteSpace: 'nowrap' }}>
                     PROJECT IMAGE SCREENSHOT
                   </label>
                   
@@ -821,7 +898,7 @@ export const ProjectShowcase: React.FC = () => {
 
                 {/* Banner Input */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <label style={{ fontSize: '0.8rem', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px' }}>
+                  <label style={{ fontSize: 'clamp(0.7rem, 2vw, 0.8rem)', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px', whiteSpace: 'nowrap' }}>
                     TECHNICAL BANNER / CHART
                   </label>
                   
@@ -867,9 +944,138 @@ export const ProjectShowcase: React.FC = () => {
                 </div>
               </div>
 
+              {/* Field: Project Demo Video (Drag and Drop) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label style={{ fontSize: 'clamp(0.7rem, 2vw, 0.8rem)', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px', whiteSpace: 'nowrap' }}>
+                  PROJECT DEMO VIDEO (REQUIRED)
+                </label>
+                
+                <div 
+                  className={`clickable ${isDraggingVideo ? 'border-glow-cyan' : ''}`}
+                  style={{
+                    border: isDraggingVideo ? '2px solid #00f0ff' : '2px dashed rgba(0, 240, 255, 0.3)',
+                    backgroundColor: isDraggingVideo ? 'rgba(0, 240, 255, 0.05)' : 'rgba(0, 0, 0, 0.2)',
+                    padding: '30px 24px',
+                    borderRadius: '12px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    boxShadow: isDraggingVideo ? '0 0 20px rgba(0, 240, 255, 0.2)' : 'none',
+                    backdropFilter: 'blur(8px)',
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDraggingVideo(true);
+                  }}
+                  onDragLeave={() => {
+                    setIsDraggingVideo(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDraggingVideo(false);
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) handleVideoFile(file);
+                  }}
+                  onClick={() => {
+                    document.getElementById('video-file-input')?.click();
+                  }}
+                  onMouseOver={(e) => {
+                    if (!isDraggingVideo) {
+                      e.currentTarget.style.borderColor = '#00f0ff';
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.03)';
+                      e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 240, 255, 0.1)';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isDraggingVideo) {
+                      e.currentTarget.style.borderColor = 'rgba(0, 240, 255, 0.3)';
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }
+                  }}
+                >
+                  <input 
+                    id="video-file-input"
+                    type="file" 
+                    accept=".mp4,.mov,.avi,.webm,.mkv"
+                    onChange={(e) => handleFileChange(e, 'video')}
+                    style={{ display: 'none' }}
+                  />
+
+                  {videoPreview ? (
+                    <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '10px' }} onClick={(e) => e.stopPropagation()}>
+                      <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(0, 240, 255, 0.3)', boxShadow: '0 0 15px rgba(0, 240, 255, 0.1)' }}>
+                        <video 
+                          src={videoPreview} 
+                          controls 
+                          style={{ width: '100%', maxHeight: '200px', display: 'block', backgroundColor: '#000' }} 
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDemoVideo(null);
+                            setVideoPreview(null);
+                            const videoInput = document.getElementById('video-file-input') as HTMLInputElement | null;
+                            if (videoInput) {
+                              videoInput.value = '';
+                            }
+                          }}
+                          onMouseEnter={playHover}
+                          style={{
+                            position: 'absolute',
+                            top: '8px',
+                            right: '8px',
+                            backgroundColor: 'rgba(239, 68, 68, 0.85)',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '4px 10px',
+                            borderRadius: '4px',
+                            fontSize: '0.7rem',
+                            fontWeight: 'bold',
+                            fontFamily: "'Orbitron', sans-serif",
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s',
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
+                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.85)'}
+                        >
+                          REMOVE
+                        </button>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#00f0ff', fontWeight: 600, fontFamily: "'Space Grotesk', sans-serif" }}>
+                        Selected: {demoVideo?.name} ({( (demoVideo?.size || 0) / (1024 * 1024) ).toFixed(2)} MB)
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <Video size={36} className="animate-flicker" style={{ color: '#00f0ff', filter: 'drop-shadow(0 0 8px rgba(0, 240, 255, 0.6))' }} />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" }}>
+                          Drag & Drop video file here, or click to browse
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: '#9ca3af', fontFamily: "'Space Grotesk', sans-serif", maxWidth: '500px', margin: '0 auto', lineHeight: '1.4' }}>
+                          Upload a demo video of your website, AI model, IoT project, software application, or technical innovation.
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+                
+                <span style={{ fontSize: '0.7rem', color: '#8b5cf6', fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '0.5px' }}>
+                  Show your project's working functionality, interface, features, hardware setup, workflow, or live demonstration.
+                </span>
+              </div>
+
               {/* Field 6: Description */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '0.8rem', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px' }}>
+                <label style={{ fontSize: 'clamp(0.7rem, 2vw, 0.8rem)', color: '#e5e7eb', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px', whiteSpace: 'nowrap' }}>
                   SHORT PROJECT DESCRIPTION
                 </label>
                 <textarea 
@@ -894,6 +1100,32 @@ export const ProjectShowcase: React.FC = () => {
                   required
                 />
               </div>
+
+              {/* Upload Progress Bar */}
+              {isUploading && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px 0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#00f0ff', fontWeight: 700, fontFamily: "'Orbitron', sans-serif", letterSpacing: '1px' }}>
+                      TRANSMITTING PROJECT PACKAGE...
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: '#00f0ff', fontWeight: 700, fontFamily: "'Orbitron', sans-serif" }}>
+                      {uploadProgress}%
+                    </span>
+                  </div>
+                  <div style={{ width: '100%', height: '8px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(0,240,255,0.2)' }}>
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${uploadProgress}%` }}
+                      transition={{ duration: 0.1 }}
+                      style={{
+                        height: '100%',
+                        background: 'linear-gradient(90deg, #00f0ff, #8b5cf6)',
+                        boxShadow: '0 0 10px #00f0ff',
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Submit trigger button */}
               <button
@@ -1048,6 +1280,41 @@ export const ProjectShowcase: React.FC = () => {
                 <div style={{ color: '#d1d5db', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '30px' }}>
                   <p>{selectedProject.description}</p>
                 </div>
+
+                {/* Demo Video Player */}
+                {selectedProject.demoVideo && (
+                  <div style={{ marginBottom: '30px' }}>
+                    <h4 style={{ fontSize: '0.75rem', color: '#00f0ff', letterSpacing: '1.5px', marginBottom: '12px', fontFamily: "'Orbitron', sans-serif" }} className="text-glow-cyan">
+                      PROJECT DEMO VIDEO
+                    </h4>
+                    <div 
+                      className="glass-panel"
+                      style={{ 
+                        width: '100%', 
+                        borderRadius: '12px', 
+                        overflow: 'hidden', 
+                        border: '1px solid rgba(0, 240, 255, 0.3)',
+                        boxShadow: '0 0 25px rgba(0, 240, 255, 0.15)',
+                        backgroundColor: '#000',
+                        position: 'relative'
+                      }}
+                    >
+                      <video 
+                        src={getMediaUrl(selectedProject.demoVideo)} 
+                        controls 
+                        playsInline
+                        preload="metadata"
+                        style={{ 
+                          width: '100%', 
+                          maxHeight: '400px',
+                          display: 'block',
+                          objectFit: 'contain',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Image Previews */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
