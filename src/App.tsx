@@ -103,7 +103,7 @@ function App() {
 
           {/* Scrolling Web Content Layers */}
           <div style={{ position: 'relative', zIndex: 5, width: '100%' }}>
-            
+
             {/* HERO SECTION */}
             <section
               id="hero"
@@ -120,8 +120,8 @@ function App() {
                 zIndex: -1
               }} />
 
-              <div 
-                className="container hero-container" 
+              <div
+                className="container hero-container"
               >
                 {/* Visual Accent badge */}
                 <motion.div
@@ -157,7 +157,7 @@ function App() {
                     transition={{ delay: 0.4, duration: 0.8, ease: 'easeOut' }}
                     className="college-title-accent"
                   >
-                    DR. B.B. HEGDE FIRST GRADE COLLEGE, KUNDAPURA
+                    Dr. B. B. HEGDE FIRST GRADE COLLEGE, KUNDAPURA
                   </motion.div>
 
                   {/* Expo Heading title */}
